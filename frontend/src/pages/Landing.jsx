@@ -9,9 +9,7 @@ const Landing = () => {
       <nav className="bg-white px-6 py-4 flex items-center justify-between shadow-sm sticky top-0 z-50">
         <div className="flex items-center gap-2">
           {/* Logo icon */}
-          <div className="w-8 h-8 bg-[#0b2b56] text-white flex items-center justify-center rounded-md">
-            <FiHome size={18} />
-          </div>
+          <img src="/logo.png" alt="SLIIT Nest Logo" className="w-10 h-10 object-contain" />
           <div>
             <h1 className="text-xl font-bold text-[#0b2b56] leading-none">SLIIT Nest</h1>
             <p className="text-[10px] text-gray-400">Student Accommodation</p>
@@ -21,7 +19,7 @@ const Landing = () => {
         <div className="hidden md:flex items-center gap-8 text-sm font-medium text-gray-600">
           <Link to="/" className="text-gray-900">Home</Link>
           <Link to="/search" className="hover:text-[#0b2b56]">Find Boardings</Link>
-          <Link to="#" className="hover:text-[#0b2b56]">Find Roommates</Link>
+          <Link to="/roommates" className="hover:text-[#0b2b56]">Find Roommates</Link>
           <Link to="#" className="hover:text-[#0b2b56]">About</Link>
         </div>
 
@@ -55,7 +53,7 @@ const Landing = () => {
               <FiSearch size={20} />
               Search Boardings Now
             </Link>
-            <Link to="#" className="flex items-center justify-center gap-2 px-8 py-3.5 bg-transparent border border-white text-white rounded-lg font-medium text-lg hover:bg-white/10 transition">
+            <Link to="/roommates" className="flex items-center justify-center gap-2 px-8 py-3.5 bg-transparent border border-white text-white rounded-lg font-medium text-lg hover:bg-white/10 transition">
               <FiUsers size={20} />
               Find a Roommate
             </Link>
@@ -231,9 +229,7 @@ const Landing = () => {
            {/* Branding */}
            <div className="md:col-span-2">
               <div className="flex items-center gap-2 mb-6">
-                <div className="w-8 h-8 rounded-md border border-[#00d084] flex items-center justify-center">
-                  <FiHome size={16} className="text-[#00d084]" />
-                </div>
+                <img src="/logo.png" alt="SLIIT Nest Logo" className="w-10 h-10 object-contain rounded-md" />
                 <h1 className="text-2xl font-bold text-white">SLIIT Nest</h1>
               </div>
               <p className="text-gray-300 text-sm max-w-sm leading-relaxed">

@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import api from '../../api/axiosConfig';
-import { FiUser, FiMail, FiLock, FiShield, FiEye, FiEyeOff } from 'react-icons/fi';
+import { FiUser, FiMail, FiLock, FiShield, FiEye, FiEyeOff, FiPhone, FiMapPin, FiCalendar } from 'react-icons/fi';
 
 const Register = () => {
   const { register, handleSubmit, watch, formState: { errors } } = useForm();
@@ -18,7 +18,12 @@ const Register = () => {
   const onSubmit = async (data) => {
     try {
       const payload = {
-        fullName: data.fullName,
+        firstName: data.firstName,
+        lastName: data.lastName,
+        phoneNumber: data.phoneNumber,
+        address: data.address,
+        gender: data.gender,
+        age: parseInt(data.age, 10),
         email: data.email,
         password: data.password,
         role: data.role,
@@ -48,25 +53,130 @@ const Register = () => {
         </div>
       </div>
 
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md z-10">
+      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-xl z-10">
         <div className="bg-white/80 backdrop-blur-xl py-8 px-4 shadow-2xl shadow-blue-500/10 sm:rounded-2xl sm:px-10 border border-white/50 relative">
           <form className="space-y-5" onSubmit={handleSubmit(onSubmit)}>
             
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Full Name</label>
-              <div className="mt-1 relative rounded-md shadow-sm">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FiUser className="text-gray-400" />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <div>
+                <label className="block text-sm font-medium text-gray-700">First Name</label>
+                <div className="mt-1 relative rounded-md shadow-sm">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <FiUser className="text-gray-400" />
+                  </div>
+                  <input
+                    type="text"
+                    className={`block w-full pl-10 pr-3 py-3 border ${errors.firstName ? 'border-red-300' : 'border-gray-300'} rounded-xl focus:ring-blue-500 focus:border-blue-500 bg-white/50`}
+                    placeholder="John"
+                    {...register('firstName', { 
+                      required: 'First name is required',
+                      maxLength: { value: 20, message: 'Max 20 characters' }
+                    })}
+                  />
                 </div>
-                <input
-                  type="text"
-                  className={`block w-full pl-10 pr-3 py-3 border ${errors.fullName ? 'border-red-300' : 'border-gray-300'} rounded-xl focus:ring-blue-500 focus:border-blue-500 bg-white/50`}
-                  placeholder="John Doe"
-                  {...register('fullName', { required: 'Full name is required' })}
-                />
+                {errors.firstName && <p className="mt-1 text-xs text-red-600">{errors.firstName.message}</p>}
               </div>
-              {errors.fullName && <p className="mt-1 text-xs text-red-600">{errors.fullName.message}</p>}
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Last Name</label>
+                <div className="mt-1 relative rounded-md shadow-sm">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <FiUser className="text-gray-400" />
+                  </div>
+                  <input
+                    type="text"
+                    className={`block w-full pl-10 pr-3 py-3 border ${errors.lastName ? 'border-red-300' : 'border-gray-300'} rounded-xl focus:ring-blue-500 focus:border-blue-500 bg-white/50`}
+                    placeholder="Doe"
+                    {...register('lastName', { 
+                      required: 'Last name is required',
+                      maxLength: { value: 20, message: 'Max 20 characters' }
+                    })}
+                  />
+                </div>
+                {errors.lastName && <p className="mt-1 text-xs text-red-600">{errors.lastName.message}</p>}
+              </div>
             </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+               <div>
+                <label className="block text-sm font-medium text-gray-700">Phone Number</label>
+                <div className="mt-1 relative rounded-md shadow-sm">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <FiPhone className="text-gray-400" />
+                  </div>
+                  <input
+                    type="text"
+                    className={`block w-full pl-10 pr-3 py-3 border ${errors.phoneNumber ? 'border-red-300' : 'border-gray-300'} rounded-xl focus:ring-blue-500 focus:border-blue-500 bg-white/50`}
+                    placeholder="07xxxxxxxx"
+                    {...register('phoneNumber', { 
+                      required: 'Phone number is required',
+                      pattern: { value: /^[0-9]{10}$/, message: 'Must be exactly 10 digits' }
+                    })}
+                  />
+                </div>
+                {errors.phoneNumber && <p className="mt-1 text-xs text-red-600">{errors.phoneNumber.message}</p>}
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Gender</label>
+                <div className="mt-1 relative rounded-md shadow-sm">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <FiUser className="text-gray-400" />
+                  </div>
+                  <select
+                    className={`block w-full pl-10 pr-3 py-3 border ${errors.gender ? 'border-red-300' : 'border-gray-300'} rounded-xl focus:ring-blue-500 focus:border-blue-500 bg-white/50 appearance-none`}
+                    {...register('gender', { required: 'Please specify gender' })}
+                  >
+                    <option value="">Select gender...</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                  </select>
+                </div>
+                {errors.gender && <p className="mt-1 text-xs text-red-600">{errors.gender.message}</p>}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-[1fr_120px] gap-5">
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Address</label>
+                <div className="mt-1 relative rounded-md shadow-sm">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <FiMapPin className="text-gray-400" />
+                  </div>
+                  <input
+                    type="text"
+                    className={`block w-full pl-10 pr-3 py-3 border ${errors.address ? 'border-red-300' : 'border-gray-300'} rounded-xl focus:ring-blue-500 focus:border-blue-500 bg-white/50`}
+                    placeholder="123 Main St"
+                    {...register('address', { 
+                      required: 'Address is required',
+                      maxLength: { value: 50, message: 'Max 50 characters' }
+                    })}
+                  />
+                </div>
+                {errors.address && <p className="mt-1 text-xs text-red-600">{errors.address.message}</p>}
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Age</label>
+                <div className="mt-1 relative rounded-md shadow-sm">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <FiCalendar className="text-gray-400" />
+                  </div>
+                  <input
+                    type="number"
+                    className={`block w-full pl-10 pr-3 py-3 border ${errors.age ? 'border-red-300' : 'border-gray-300'} rounded-xl focus:ring-blue-500 focus:border-blue-500 bg-white/50`}
+                    placeholder="18"
+                    {...register('age', { 
+                      required: 'Age is required',
+                      min: { value: 10, message: 'Min 10' },
+                      max: { value: 100, message: 'Max 100' }
+                    })}
+                  />
+                </div>
+                {errors.age && <p className="mt-1 text-xs text-red-600">{errors.age.message}</p>}
+              </div>
+            </div>
+
 
             <div>
               <label className="block text-sm font-medium text-gray-700">

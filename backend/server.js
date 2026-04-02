@@ -7,6 +7,7 @@ const connectDB = require('./src/config/db');
 const errorHandler = require('./src/utils/errorHandler');
 const listingRoutes = require('./src/routes/listingRoutes');
 const authRoutes = require('./src/routes/authRoutes');
+const roommateRoutes = require('./src/routes/roommateRoutes');
 
 // Connect Database
 connectDB();
@@ -15,7 +16,9 @@ const app = express();
 
 // Middleware
 app.use(cors({
-  origin: ['http://localhost:3000', 'http://127.0.0.1:3000', 'http://localhost:5173'],
+  origin: function(origin, callback) {
+    callback(null, true);
+  },
   credentials: true,
 }));
 app.use(express.json());
@@ -29,6 +32,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 // Routes
 app.use('/api/listings', listingRoutes);
 app.use('/api/auth', authRoutes);
+app.use('/api/roommates', roommateRoutes);
 
 // Generic Root
 app.get('/', (req, res) => {

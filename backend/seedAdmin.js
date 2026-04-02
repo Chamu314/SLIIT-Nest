@@ -14,7 +14,8 @@ const seedAdmin = async () => {
     }
 
     await User.create({
-      fullName: 'System Administrator',
+      firstName: 'System',
+      lastName: 'Administrator',
       email: 'admin@sliitnest.com',
       password: 'adminpassword123',
       role: 'Admin',

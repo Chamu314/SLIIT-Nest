@@ -20,6 +20,10 @@ import Register from './pages/Auth/Register';
 import VerifyEmail from './pages/Auth/VerifyEmail';
 import Profile from './pages/Profile/Profile';
 import AdminDashboard from './pages/Admin/AdminDashboard';
+import RoommateSearch from './pages/Roommates/RoommateSearch';
+import CreateRoommatePost from './pages/Roommates/CreateRoommatePost';
+import EditRoommatePost from './pages/Roommates/EditRoommatePost';
+import RoommateProfile from './pages/Roommates/RoommateProfile';
 
 function App() {
   return (
@@ -39,6 +43,12 @@ function App() {
 
         {/* Landing Page */}
         <Route path="/" element={<Landing />} />
+
+        {/* Roommate Finder Pages */}
+        <Route path="/roommates" element={<RoommateSearch />} />
+        <Route path="/roommates/add" element={<ProtectedRoute><CreateRoommatePost /></ProtectedRoute>} />
+        <Route path="/roommates/edit/:id" element={<ProtectedRoute><EditRoommatePost /></ProtectedRoute>} />
+        <Route path="/roommates/:id" element={<RoommateProfile />} />
 
         {/* Protected Dashboard Routes */}
         <Route element={<ProtectedRoute><MainLayout /></ProtectedRoute>}>

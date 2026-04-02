@@ -141,7 +141,7 @@ const EditListing = () => {
     setIsPreviewOpen(true);
   };
   
-  const getFullURL = (path) => path.startsWith('http') ? path : `http://localhost:5000${path}`;
+  const getFullURL = (path) => path.startsWith('http') ? path : `http://localhost:5001${path}`;
 
   const allPreviewPhotos = [
     ...existingPhotos.map(p => getFullURL(p)), 
