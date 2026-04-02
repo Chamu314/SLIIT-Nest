@@ -9,6 +9,7 @@ import { ProtectedRoute } from './components/Routing/ProtectedRoute';
 import { RoleRoute } from './components/Routing/RoleRoute';
 
 // Pages
+import Landing from './pages/Landing';
 import Dashboard from './pages/Dashboard';
 import MyListings from './pages/MyListings';
 import AddListing from './pages/AddListing';
@@ -36,10 +37,13 @@ function App() {
           </div>
         } />
 
-        <Route path="/" element={<ProtectedRoute><MainLayout /></ProtectedRoute>}>
-          <Route index element={<Navigate to="/dashboard" replace />} />
+        {/* Landing Page */}
+        <Route path="/" element={<Landing />} />
+
+        {/* Protected Dashboard Routes */}
+        <Route element={<ProtectedRoute><MainLayout /></ProtectedRoute>}>
           
-          <Route path="dashboard" element={
+          <Route path="/dashboard" element={
             <RoleRoute roles={['Owner']}><Dashboard /></RoleRoute>
           } />
           

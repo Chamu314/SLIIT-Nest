@@ -19,9 +19,9 @@ exports.getListingById = async (req, res, next) => {
   try {
     const listing = await Listing.findById(req.params.id);
     if (!listing) return res.status(404).json({ success: false, message: 'Listing not found' });
-    
+
     // Check ownership
-    if (listing.ownerId !== req.user._id) {
+    if (String(listing.ownerId) !== String(req.user._id)) {
       return res.status(403).json({ success: false, message: 'Not authorized to access this listing' });
     }
 
@@ -40,7 +40,7 @@ exports.createListing = async (req, res, next) => {
     req.body.ownerId = req.user._id;
     // Force status to "Pending" initially
     req.body.status = 'Pending';
-    
+
     // Process uploaded files if any
     if (req.files && req.files.length > 0) {
       req.body.photos = req.files.map(file => `/uploads/${file.filename}`);
@@ -66,7 +66,7 @@ exports.updateListing = async (req, res, next) => {
     if (!listing) return res.status(404).json({ success: false, message: 'Listing not found' });
 
     // Ensure owner
-    if (listing.ownerId.toString() !== req.user._id.toString()) {
+    if (String(listing.ownerId) !== String(req.user._id)) {
       return res.status(403).json({ success: false, message: 'Not authorized' });
     }
 
@@ -79,12 +79,12 @@ exports.updateListing = async (req, res, next) => {
         finalPhotos = [req.body.existingPhotos];
       }
     }
-    
+
     if (req.files && req.files.length > 0) {
       const newPhotos = req.files.map(file => `/uploads/${file.filename}`);
       finalPhotos = [...finalPhotos, ...newPhotos];
     }
-    
+
     // Only update photos if either existingPhotos or files were provided,
     // otherwise the front-end might just want to keep the old ones if it didn't send them,
     // but typically a form-data request sends the state.
@@ -118,7 +118,7 @@ exports.deleteListing = async (req, res, next) => {
     if (!listing) return res.status(404).json({ success: false, message: 'Listing not found' });
 
     // Ensure owner
-    if (listing.ownerId !== req.user._id) {
+    if (String(listing.ownerId) !== String(req.user._id)) {
       return res.status(403).json({ success: false, message: 'Not authorized' });
     }
 
