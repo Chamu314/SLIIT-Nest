@@ -2,7 +2,7 @@ const nodemailer = require('nodemailer');
 
 const sendEmail = async (options) => {
   const isFakeSmtp = process.env.SMTP_EMAIL === 'your_email' || !process.env.SMTP_EMAIL;
-  
+
   if (isFakeSmtp) {
     console.log('\n======================================================');
     console.log(`[MOCK EMAIL INTERCEPTED - Intended for ${options.email}]`);
@@ -30,7 +30,7 @@ const sendEmail = async (options) => {
   };
 
   const info = await transporter.sendMail(message);
-  console.log('Message sent: %s', info.messageId);
+  console.log('Message sent Successfully: %s', info.messageId);
 };
 
 module.exports = sendEmail;
