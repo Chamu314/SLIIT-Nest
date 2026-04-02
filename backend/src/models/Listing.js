@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const listingSchema = new mongoose.Schema({
   ownerId: {
-    type: String, // Mocked as String for simple testing without external User model yet
+    type: String, // Kept as String to ensure older uploaded listings don't vanish due to strict BSON typing!
     required: true
   },
   title: {
