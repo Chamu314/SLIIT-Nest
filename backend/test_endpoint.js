@@ -1,18 +1,18 @@
 (async () => {
   try {
-    const login = await fetch('http://127.0.0.1:5001/api/auth/login', {
+    const login = await fetch('http://127.0.0.1:5000/api/auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email: 'it23343253@my.sliit.lk', password: 'password123' })
     });
-    
+
     // Extract token from JSON instead
     const authData = await login.json();
     console.log("Auth success?", authData.success);
-    
+
     // Some apps use Bearer tokens instead or alongside cookies
     let cookieStr = login.headers.get('set-cookie');
-    
+
     const payload = {
       bio: "Computing student looking for roommates",
       whatsappNumber: "0771234567",
@@ -21,10 +21,10 @@
       habits: { nonSmoker: true, studyPreference: "Quiet" },
       location: "Malabe"
     };
-    
+
     console.log("sending payload");
-    const res = await fetch('http://127.0.0.1:5001/api/roommates', {
-      method: 'POST',
+    const res = await fetch('http://127.0.0.1:5000/api/roommates', {
+      method: 'POST', S
       headers: {
         'Content-Type': 'application/json',
         'Cookie': cookieStr || ''

@@ -18,7 +18,7 @@ const PreviewModal = ({ isOpen, onClose, data }) => {
 
   const getImageUrl = (url) => {
     if (!url) return '';
-    if (url.startsWith('/uploads')) return `http://localhost:5001${url}`;
+    if (url.startsWith('/uploads')) return `http://localhost:5000${url}`;
     if (url.startsWith('blob:')) return url;
     return url;
   };
@@ -37,15 +37,15 @@ const PreviewModal = ({ isOpen, onClose, data }) => {
 
         {/* The Mocked Student Listing Card */}
         <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm mx-auto w-full max-w-[350px]">
-          <div 
+          <div
             className="relative h-48 bg-gray-100 cursor-default group"
             onMouseEnter={() => setIsHovering(true)}
             onMouseLeave={() => { setIsHovering(false); setCurrentImageIndex(0); }}
           >
             {data.photos && data.photos.length > 0 ? (
-              <img 
-                src={getImageUrl(data.photos[currentImageIndex])} 
-                alt="Listing Cover" 
+              <img
+                src={getImageUrl(data.photos[currentImageIndex])}
+                alt="Listing Cover"
                 className="w-full h-full object-cover transition-opacity duration-300"
               />
             ) : (
@@ -60,9 +60,9 @@ const PreviewModal = ({ isOpen, onClose, data }) => {
             {data.photos && data.photos.length > 1 && (
               <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                 {data.photos.map((_, i) => (
-                  <div 
-                    key={i} 
-                    className={`h-1.5 rounded-full transition-all ${i === currentImageIndex ? 'w-3 bg-white' : 'w-1.5 bg-white/60'}`} 
+                  <div
+                    key={i}
+                    className={`h-1.5 rounded-full transition-all ${i === currentImageIndex ? 'w-3 bg-white' : 'w-1.5 bg-white/60'}`}
                   />
                 ))}
               </div>
@@ -74,7 +74,7 @@ const PreviewModal = ({ isOpen, onClose, data }) => {
               {data.title || 'Untitled Boarding'}
             </h3>
             <p className="text-gray-500 text-sm mb-3">{data.accommodationType || 'Any Type'}</p>
-            
+
             <p className="text-blue-600 font-bold text-xl mb-3">
               Rs. {data.monthlyRent ? Number(data.monthlyRent).toLocaleString() : '0'}
               <span className="text-sm text-gray-500 font-normal">/month</span>
@@ -98,7 +98,7 @@ const PreviewModal = ({ isOpen, onClose, data }) => {
                   <span key={i} className="px-2 py-0.5 bg-blue-50 text-blue-600 text-[10px] rounded-full font-medium tracking-wide border border-blue-100">{f}</span>
                 ))}
                 {!showAllFacilities && data.facilities.length > 3 && (
-                  <button 
+                  <button
                     onClick={(e) => { e.stopPropagation(); setShowAllFacilities(true); }}
                     className="px-2 py-0.5 bg-gray-50 hover:bg-gray-100 text-gray-500 text-[10px] rounded-full font-medium border border-gray-200 transition-colors cursor-pointer"
                   >
@@ -106,7 +106,7 @@ const PreviewModal = ({ isOpen, onClose, data }) => {
                   </button>
                 )}
                 {showAllFacilities && data.facilities.length > 3 && (
-                  <button 
+                  <button
                     onClick={(e) => { e.stopPropagation(); setShowAllFacilities(false); }}
                     className="px-2 py-0.5 bg-gray-50 hover:bg-gray-100 text-gray-500 text-[10px] rounded-full font-medium border border-gray-200 transition-colors cursor-pointer"
                   >
@@ -125,7 +125,7 @@ const PreviewModal = ({ isOpen, onClose, data }) => {
             </button>
           </div>
         </div>
-        
+
         <p className="text-center text-sm text-gray-500 mt-6 bg-white p-3 rounded-lg border border-gray-200 shadow-inner">
           This is exactly how your listing card will appear to students on their feed once approved by an Admin.
         </p>
