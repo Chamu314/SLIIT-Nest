@@ -15,6 +15,7 @@ import Dashboard from './pages/Dashboard';
 import MyListings from './pages/MyListings';
 import AddListing from './pages/AddListing';
 import EditListing from './pages/EditListing';
+import Payment from './pages/Payment';
 
 import Login from './pages/Auth/Login';
 import Register from './pages/Auth/Register';
@@ -67,6 +68,10 @@ function App() {
           
           <Route path="listings/add" element={
             <RoleRoute roles={['Owner']}><AddListing /></RoleRoute>
+          } />
+          
+          <Route path="listings/payment" element={
+            <RoleRoute roles={['Owner']}><Payment /></RoleRoute>
           } />
           
           <Route path="listings/edit/:id" element={

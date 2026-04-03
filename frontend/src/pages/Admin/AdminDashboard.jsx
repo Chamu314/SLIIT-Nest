@@ -1,18 +1,232 @@
-import React, { useState } from 'react';
-import { FiGrid, FiUsers, FiClock, FiAlertCircle } from 'react-icons/fi';
+import React, { useEffect, useState } from 'react';
+import { FiGrid, FiUsers, FiCreditCard, FiEye, FiRefreshCw, FiCheck, FiX } from 'react-icons/fi';
+import api from '../../api/axiosConfig';
+import { toast } from 'react-toastify';
 
 const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('listings');
+  const [payments, setPayments] = useState([]);
+  const [listings, setListings] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [lastUpdated, setLastUpdated] = useState(null);
+  const [stats, setStats] = useState([
+    { name: 'Total Listings', value: '0', icon: FiGrid, color: 'text-blue-600', bg: 'bg-blue-100' },
+    { name: 'Verified Students', value: '0', icon: FiUsers, color: 'text-green-600', bg: 'bg-green-100' },
+    { name: 'Pending Payments', value: '0', icon: FiCreditCard, color: 'text-yellow-600', bg: 'bg-yellow-100' },
+  ]);
 
-  // Dummy stats
-  const stats = [
-    { name: 'Total Listings', value: '143', icon: FiGrid, color: 'text-blue-600', bg: 'bg-blue-100' },
-    { name: 'Verified Students', value: '892', icon: FiUsers, color: 'text-green-600', bg: 'bg-green-100' },
-    { name: 'Pending Items', value: '12', icon: FiClock, color: 'text-yellow-600', bg: 'bg-yellow-100' },
-  ];
+  useEffect(() => {
+    if (activeTab === 'payments') {
+      fetchPayments();
+    } else if (activeTab === 'listings') {
+      fetchListings();
+    }
+  }, [activeTab]);
+
+  useEffect(() => {
+    fetchPayments();
+    fetchListings();
+    
+    // Set up auto-refresh every 30 seconds
+    const interval = setInterval(() => {
+      if (activeTab === 'payments') {
+        fetchPayments();
+      } else if (activeTab === 'listings') {
+        fetchListings();
+      }
+    }, 30000);
+    
+    return () => clearInterval(interval);
+  }, [activeTab]);
+
+  const fetchPayments = async () => {
+    try {
+      const response = await api.get('/payments');
+      // Sort payments by creation date (newest first)
+      const sortedPayments = response.data.data.sort((a, b) => 
+        new Date(b.createdAt) - new Date(a.createdAt)
+      );
+      setPayments(sortedPayments);
+      setLastUpdated(new Date());
+      
+      // Update stats
+      const pendingCount = sortedPayments.filter(p => p.status === 'pending').length;
+      setStats(prev => [
+        prev[0],
+        prev[1],
+        { ...prev[2], value: pendingCount.toString() }
+      ]);
+    } catch (error) {
+      toast.error('Failed to fetch payments');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchListings = async () => {
+    try {
+      const response = await api.get('/admin/listings/pending');
+      // Sort listings by creation date (newest first)
+      const sortedListings = response.data.data.sort((a, b) => 
+        new Date(b.createdAt) - new Date(a.createdAt)
+      );
+      setListings(sortedListings);
+      setLastUpdated(new Date());
+    } catch (error) {
+      toast.error('Failed to fetch listings');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleApprovePayment = async (paymentId) => {
+    try {
+      await api.put(`/payments/${paymentId}/approve`);
+      toast.success('Payment approved and listing created');
+      fetchPayments();
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to approve payment');
+    }
+  };
+
+  const handleRejectPayment = async (paymentId) => {
+    const reason = prompt('Please provide a reason for rejection:');
+    if (!reason) return;
+
+    try {
+      await api.put(`/payments/${paymentId}/reject`, { adminNotes: reason });
+      toast.success('Payment rejected');
+      fetchPayments();
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to reject payment');
+    }
+  };
+
+  const handleApproveListing = async (listingId) => {
+    try {
+      await api.put(`/admin/listings/${listingId}/approve`);
+      toast.success('Listing approved successfully');
+      fetchListings();
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to approve listing');
+    }
+  };
+
+  const handleRejectListing = async (listingId) => {
+    const reason = prompt('Please provide a reason for rejection:');
+    if (!reason) return;
+
+    try {
+      await api.put(`/admin/listings/${listingId}/reject`, { reason });
+      toast.success('Listing rejected');
+      fetchListings();
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to reject listing');
+    }
+  };
 
   const renderTabContent = () => {
     switch (activeTab) {
+      case 'payments':
+        return (
+          <div className="bg-white shadow rounded-lg border border-gray-100 overflow-hidden">
+            <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+              <div>
+                <h3 className="text-lg font-medium text-gray-900">Payment Approvals</h3>
+                <p className="text-sm text-gray-500">
+                  Review and approve boarding listing payments
+                  {lastUpdated && (
+                    <span className="ml-2 text-xs text-gray-400">
+                      (Last updated: {lastUpdated.toLocaleTimeString()})
+                    </span>
+                  )}
+                </p>
+              </div>
+              <button 
+                onClick={fetchPayments}
+                className="flex items-center gap-2 px-3 py-2 text-sm bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors"
+                disabled={loading}
+              >
+                <FiRefreshCw className={loading ? 'animate-spin' : ''} />
+                Refresh
+              </button>
+            </div>
+            
+            {loading ? (
+              <div className="p-6 text-center text-gray-500">Loading payments...</div>
+            ) : payments.length === 0 ? (
+              <div className="p-6 text-center text-gray-500">No pending payments</div>
+            ) : (
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Listing Details</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Payment Info</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {payments.map((payment) => (
+                    <tr key={payment._id}>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div>
+                          <div className="text-sm font-medium text-gray-900">{payment.listingId?.title || 'N/A'}</div>
+                          <div className="text-sm text-gray-500">{payment.listingId?.address || 'N/A'}</div>
+                          <div className="text-xs text-gray-400">by {payment.user.firstName} {payment.user.lastName}</div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-900">{payment.paymentMethod.replace('_', ' ')}</div>
+                        <div className="text-xs text-gray-500">ID: {payment.transactionId}</div>
+                        <button 
+                          onClick={() => window.open(`/uploads/payments/${payment.paymentSlip}`, '_blank')}
+                          className="text-blue-600 hover:text-blue-800 text-xs flex items-center gap-1"
+                        >
+                          <FiEye /> View Slip
+                        </button>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        Rs. {payment.amount.toLocaleString()}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                          payment.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                          payment.status === 'approved' ? 'bg-green-100 text-green-800' :
+                          'bg-red-100 text-red-800'
+                        }`}>
+                          {payment.status}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        {payment.status === 'pending' && (
+                          <>
+                            <button 
+                              onClick={() => handleApprovePayment(payment._id)}
+                              className="text-green-600 hover:text-green-900 mr-4 flex items-center gap-1"
+                            >
+                              <FiCheck /> Approve
+                            </button>
+                            <button 
+                              onClick={() => handleRejectPayment(payment._id)}
+                              className="text-red-600 hover:text-red-900 flex items-center gap-1"
+                            >
+                              <FiX /> Reject
+                            </button>
+                          </>
+                        )}
+                        {payment.status !== 'pending' && payment.adminNotes && (
+                          <div className="text-xs text-gray-500 italic">{payment.adminNotes}</div>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+        );
       case 'reviews':
         return (
           <div className="bg-white shadow rounded-lg border border-gray-100 p-6 text-center text-gray-500">
@@ -29,35 +243,84 @@ const AdminDashboard = () => {
       default:
         return (
           <div className="bg-white shadow rounded-lg border border-gray-100 overflow-hidden">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Listing</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Owner</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {/* Dummy Row for demonstration */}
-                <tr>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center">
-                      <div className="h-10 w-10 flex-shrink-0 bg-gray-200 rounded object-cover"></div>
-                      <div className="ml-4">
-                        <div className="text-sm font-medium text-gray-900">Cozy Room near SLIIT</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Kamal Perera</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Malabe</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <button className="text-green-600 hover:text-green-900 mr-4">Approve</button>
-                    <button className="text-red-600 hover:text-red-900">Reject</button>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+            <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+              <div>
+                <h3 className="text-lg font-medium text-gray-900">Pending Listing Approvals</h3>
+                <p className="text-sm text-gray-500">
+                  Review and approve boarding listings
+                  {lastUpdated && (
+                    <span className="ml-2 text-xs text-gray-400">
+                      (Last updated: {lastUpdated.toLocaleTimeString()})
+                    </span>
+                  )}
+                </p>
+              </div>
+              <button 
+                onClick={fetchListings}
+                className="flex items-center gap-2 px-3 py-2 text-sm bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors"
+                disabled={loading}
+              >
+                <FiRefreshCw className={loading ? 'animate-spin' : ''} />
+                Refresh
+              </button>
+            </div>
+            
+            {loading ? (
+              <div className="p-6 text-center text-gray-500">Loading listings...</div>
+            ) : listings.length === 0 ? (
+              <div className="p-6 text-center text-gray-500">No pending listings</div>
+            ) : (
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Listing Details</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Owner</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rent</th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {listings.map((listing) => (
+                    <tr key={listing._id}>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div>
+                          <div className="text-sm font-medium text-gray-900">{listing.title}</div>
+                          <div className="text-sm text-gray-500">{listing.accommodationType}</div>
+                          <div className="text-xs text-gray-400">Capacity: {listing.capacity}</div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-900">
+                          {listing.ownerId?.firstName} {listing.ownerId?.lastName}
+                        </div>
+                        <div className="text-xs text-gray-500">{listing.ownerId?.email}</div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {listing.address}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        Rs. {listing.monthlyRent?.toLocaleString()}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <button 
+                          onClick={() => handleApproveListing(listing._id)}
+                          className="text-green-600 hover:text-green-900 mr-4 flex items-center gap-1"
+                        >
+                          <FiCheck /> Approve
+                        </button>
+                        <button 
+                          onClick={() => handleRejectListing(listing._id)}
+                          className="text-red-600 hover:text-red-900 flex items-center gap-1"
+                        >
+                          <FiX /> Reject
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
           </div>
         );
     }
@@ -86,7 +349,7 @@ const AdminDashboard = () => {
       <div className="pt-4">
         <div className="border-b border-gray-200">
           <nav className="-mb-px flex space-x-8">
-            {['listings', 'reviews', 'roommates'].map(tab => (
+            {['payments', 'listings', 'reviews', 'roommates'].map(tab => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
@@ -96,7 +359,7 @@ const AdminDashboard = () => {
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                 } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm capitalize`}
               >
-                Pending {tab}
+                {tab === 'payments' ? 'Payment Approvals' : `Pending ${tab}`}
               </button>
             ))}
           </nav>

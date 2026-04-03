@@ -45,7 +45,22 @@ const listingSchema = new mongoose.Schema({
   },
   averageRating: { type: Number, default: 0 },
   reviewCount: { type: Number, default: 0 },
-  viewCount: { type: Number, default: 0 }
+  viewCount: { type: Number, default: 0 },
+  trialExpiresAt: {
+    type: Date,
+    default: function() {
+      // Set trial expiration to 7 days from creation
+      return new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+    }
+  },
+  paymentStatus: {
+    type: String,
+    enum: ['trial', 'paid', 'expired'],
+    default: 'trial'
+  },
+  lastPaymentDate: {
+    type: Date
+  }
 }, { timestamps: true });
 
 module.exports = mongoose.model('Listing', listingSchema);

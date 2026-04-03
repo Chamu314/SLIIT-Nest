@@ -1,6 +1,6 @@
 import React, { useContext, useState } from 'react';
 import { Outlet, NavLink } from 'react-router-dom';
-import { FiHome, FiList, FiSearch, FiShield, FiDownload, FiGlobe } from 'react-icons/fi';
+import { FiHome, FiList, FiSearch, FiShield, FiDownload, FiGlobe, FiCreditCard } from 'react-icons/fi';
 import { AuthContext } from '../../context/AuthContext';
 import Header from './Header';
 import { jsPDF } from 'jspdf';
@@ -83,6 +83,9 @@ const MainLayout = () => {
             </NavLink>
             <NavLink to="/listings" className={linkStyle}>
               <FiList /> My Listings
+            </NavLink>
+            <NavLink to="/listings/payment" className={linkStyle}>
+              <FiCreditCard /> Make Payment
             </NavLink>
           </>
         );

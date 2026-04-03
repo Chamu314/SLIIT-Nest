@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { FiClock, FiCheckCircle, FiEye, FiHome } from 'react-icons/fi';
+import { FiClock, FiCheckCircle, FiEye, FiHome, FiAlertTriangle, FiCreditCard, FiSkipForward } from 'react-icons/fi';
+import { useNavigate } from 'react-router-dom';
 import api from '../api/axiosConfig';
+import { toast } from 'react-toastify';
 
 const Dashboard = () => {
   const [stats, setStats] = useState({
@@ -10,6 +12,8 @@ const Dashboard = () => {
     views: 0
   });
   const [recentListings, setRecentListings] = useState([]);
+  const [trialStatuses, setTrialStatuses] = useState([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     // In a real scenario, this might come from a dedicated /stats endpoint.
@@ -32,6 +36,11 @@ const Dashboard = () => {
         
         // Show all recent listings
         setRecentListings(listings);
+
+        // Fetch trial status
+        const trialResponse = await api.get('/payments/user/trial-status');
+        setTrialStatuses(trialResponse.data.data);
+
       } catch (error) {
         console.error('Error fetching dashboard stats', error);
       }
@@ -39,6 +48,25 @@ const Dashboard = () => {
 
     fetchDashboardData();
   }, []);
+
+  const handlePaymentClick = (listingId) => {
+    navigate('/listings/payment', { state: { listingId } });
+  };
+
+  const expiringListings = trialStatuses.filter(status => status.needsPayment || status.daysUntilExpiry <= 3);
+
+  const endTrialForListing = async (listingId) => {
+    try {
+      await api.post(`/listings/${listingId}/end-trial`);
+      toast.success('Free trial ended successfully! Payment is now required.');
+      
+      // Refresh the trial status
+      const trialResponse = await api.get('/payments/user/trial-status');
+      setTrialStatuses(trialResponse.data.data);
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to end trial');
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -85,6 +113,39 @@ const Dashboard = () => {
         </div>
       </div>
 
+      {/* Payment Alerts Section */}
+      {expiringListings.length > 0 && (
+        <div className="bg-red-50 border border-red-200 rounded-xl p-6">
+          <div className="flex items-center gap-3 mb-4">
+            <FiAlertTriangle className="w-6 h-6 text-red-600" />
+            <h2 className="text-lg font-bold text-red-800">Payment Required</h2>
+          </div>
+          <div className="space-y-3">
+            {expiringListings.map(listing => (
+              <div key={listing._id} className="bg-white rounded-lg p-4 border border-red-200">
+                <div className="flex justify-between items-center">
+                  <div>
+                    <p className="font-semibold text-gray-800">{listing.title}</p>
+                    {listing.needsPayment ? (
+                      <p className="text-sm text-red-600">Your free trial has expired. Make a payment to continue.</p>
+                    ) : (
+                      <p className="text-sm text-orange-600">Trial expires in {listing.daysUntilExpiry} day{listing.daysUntilExpiry !== 1 ? 's' : ''}</p>
+                    )}
+                  </div>
+                  <button
+                    onClick={() => handlePaymentClick(listing._id)}
+                    className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 flex items-center gap-2"
+                  >
+                    <FiCreditCard />
+                    Make Payment
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 mt-8">
         <h2 className="text-lg font-bold text-gray-800 mb-4">Quick Actions</h2>
         <div className="flex gap-4">
@@ -114,6 +175,20 @@ const Dashboard = () => {
                 }`}>
                   {listing.status}
                 </span>
+                {/* Check if this listing is in trial and add end trial button */}
+                {(() => {
+                  const trialStatus = trialStatuses.find(ts => ts._id === listing._id);
+                  return trialStatus && trialStatus.paymentStatus === 'trial' && !trialStatus.needsPayment ? (
+                    <button
+                      onClick={() => endTrialForListing(listing._id)}
+                      className="bg-orange-500 text-white px-3 py-1 rounded text-xs font-medium hover:bg-orange-600 flex items-center gap-1"
+                      title="End free trial early"
+                    >
+                      <FiSkipForward />
+                      End Trial
+                    </button>
+                  ) : null;
+                })()}
                 <a href={`/listings`} className="text-blue-600 text-sm font-medium">View</a>
               </div>
             </div>

@@ -79,7 +79,7 @@ const AddListing = () => {
       await api.post('/listings', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
-      toast.success('Listing Submitted for Approval to Admin!', { position: 'top-right' });
+      toast.success('Listing published successfully! You have a 7-day free trial.', { position: 'top-right' });
       navigate('/listings');
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to create listing');
