@@ -48,6 +48,11 @@ const roommatePostSchema = new mongoose.Schema(
       type: String,
       required: [true, 'Please specify preferred location (e.g. Near SLIIT)'],
     },
+    ageCategory: {
+      type: String,
+      enum: ['18 - 20', '21 - 25', '26 - 30', '31 - 35', '36 - 40', '41 - 50', 'Above 50'],
+      required: [true, 'Please specify your age category'],
+    },
     isActive: {
       type: Boolean,
       default: true,

@@ -6,6 +6,8 @@ import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import api from '../../api/axiosConfig';
 import { toast } from 'react-toastify';
+import PublicNavbar from '../../components/Layout/PublicNavbar';
+import PublicFooter from '../../components/Layout/PublicFooter';
 
 // Validation Schema
 const schema = Yup.object().shape({
@@ -21,6 +23,7 @@ const schema = Yup.object().shape({
   whatsappNumber: Yup.string()
     .matches(/^[0-9]{10}$/, 'Must be exactly 10 digits')
     .required('WhatsApp number is required'),
+  ageCategory: Yup.string().required('Age category is required'),
 });
 
 const CreateRoommatePost = () => {
@@ -46,7 +49,8 @@ const CreateRoommatePost = () => {
           studyPreference: data.studyPreference
         },
         location: data.location,
-        whatsappNumber: data.whatsappNumber
+        whatsappNumber: data.whatsappNumber,
+        ageCategory: data.ageCategory
       };
 
       // Ensure user is authenticated properly - auth context handling would provide token in real scenario
@@ -77,7 +81,9 @@ const CreateRoommatePost = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#f3f4f6] py-12 px-4 font-sans">
+    <div className="min-h-screen bg-[#f3f4f6] font-sans flex flex-col">
+      <PublicNavbar activePage="roommates" />
+      <div className="flex-1 py-12 px-4">
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -138,6 +144,25 @@ const CreateRoommatePost = () => {
                 placeholder="e.g. Walking distance to SLIIT"
               />
               <ErrorMsg error={errors.location} />
+            </div>
+
+            {/* Age Category */}
+            <div>
+              <label className="block text-sm font-semibold text-[#1f2937] mb-2">Age Group</label>
+              <select 
+                {...register('ageCategory')}
+                className={`w-full bg-[#f3f4f6] text-[#1f2937] text-sm py-3 px-4 rounded-lg focus:outline-none focus:ring-2 transition ${errors.ageCategory ? 'focus:ring-[#dc2626] border border-[#dc2626]' : 'focus:ring-[#0b2b56] border-none'}`}
+              >
+                <option value="">Select Age Group</option>
+                <option value="18 - 20">18 - 20</option>
+                <option value="21 - 25">21 - 25</option>
+                <option value="26 - 30">26 - 30</option>
+                <option value="31 - 35">31 - 35</option>
+                <option value="36 - 40">36 - 40</option>
+                <option value="41 - 50">41 - 50</option>
+                <option value="Above 50">Above 50</option>
+              </select>
+              <ErrorMsg error={errors.ageCategory} />
             </div>
 
             {/* Budget Range */}
@@ -213,6 +238,8 @@ const CreateRoommatePost = () => {
           </div>
         </form>
       </motion.div>
+      </div>
+      <PublicFooter />
     </div>
   );
 };

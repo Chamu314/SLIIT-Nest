@@ -5,7 +5,7 @@ const RoommatePost = require('../models/RoommatePost');
 // @access  Protected
 exports.createPost = async (req, res) => {
   try {
-    const { bio, genderPreference, budgetRange, habits, location, whatsappNumber } = req.body;
+    const { bio, genderPreference, budgetRange, habits, location, whatsappNumber, ageCategory } = req.body;
 
     const post = await RoommatePost.create({
       user: req.user._id,
@@ -15,6 +15,7 @@ exports.createPost = async (req, res) => {
       budgetRange,
       habits,
       location,
+      ageCategory,
     });
 
     res.status(201).json(post);
@@ -28,19 +29,23 @@ exports.createPost = async (req, res) => {
 // @access  Public
 exports.getPosts = async (req, res) => {
   try {
-    const { gender, minBudget, maxBudget, location, nonSmoker, studyPreference } = req.query;
+    const { gender, minBudget, maxBudget, location, nonSmoker, studyPreference, ageCategory } = req.query;
     
     // Build filter object
     let filter = { isActive: true };
 
-    if (gender) filter.genderPreference = gender;
+    if (gender) {
+      filter.genderPreference = { $in: [gender, 'Any'] };
+    }
     
-    // Budget filter implementation
+    if (ageCategory) {
+      filter.ageCategory = ageCategory;
+    }
+    
+    // Budget filter implementation - find overlapping ranges
     if (minBudget || maxBudget) {
-      // Find posts where their range overlaps or contains the budget preference
-      // Simplification: just query against max and min loosely
-      filter['budgetRange.min'] = { $gte: minBudget ? parseInt(minBudget) : 0 };
-      if (maxBudget) filter['budgetRange.max'] = { $lte: parseInt(maxBudget) };
+      if (minBudget) filter['budgetRange.max'] = { $gte: parseInt(minBudget) };
+      if (maxBudget) filter['budgetRange.min'] = { $lte: parseInt(maxBudget) };
     }
 
     if (location) filter.location = { $regex: location, $options: 'i' };

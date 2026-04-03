@@ -10,6 +10,7 @@ import { RoleRoute } from './components/Routing/RoleRoute';
 
 // Pages
 import Landing from './pages/Landing';
+import About from './pages/About';
 import Dashboard from './pages/Dashboard';
 import MyListings from './pages/MyListings';
 import AddListing from './pages/AddListing';
@@ -24,6 +25,7 @@ import RoommateSearch from './pages/Roommates/RoommateSearch';
 import CreateRoommatePost from './pages/Roommates/CreateRoommatePost';
 import EditRoommatePost from './pages/Roommates/EditRoommatePost';
 import RoommateProfile from './pages/Roommates/RoommateProfile';
+import MyMatches from './pages/Roommates/MyMatches';
 
 function App() {
   return (
@@ -41,13 +43,15 @@ function App() {
           </div>
         } />
 
-        {/* Landing Page */}
+        {/* Public Pages */}
         <Route path="/" element={<Landing />} />
+        <Route path="/about" element={<About />} />
 
         {/* Roommate Finder Pages */}
         <Route path="/roommates" element={<RoommateSearch />} />
         <Route path="/roommates/add" element={<ProtectedRoute><CreateRoommatePost /></ProtectedRoute>} />
         <Route path="/roommates/edit/:id" element={<ProtectedRoute><EditRoommatePost /></ProtectedRoute>} />
+        <Route path="/roommates/matches" element={<ProtectedRoute><MyMatches /></ProtectedRoute>} />
         <Route path="/roommates/:id" element={<RoommateProfile />} />
 
         {/* Protected Dashboard Routes */}

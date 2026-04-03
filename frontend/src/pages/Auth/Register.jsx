@@ -168,8 +168,9 @@ const Register = () => {
                     placeholder="18"
                     {...register('age', { 
                       required: 'Age is required',
-                      min: { value: 10, message: 'Min 10' },
-                      max: { value: 100, message: 'Max 100' }
+                      valueAsNumber: true,
+                      min: { value: 10, message: 'Age must be between 10 and 100' },
+                      max: { value: 100, message: 'Age must be between 10 and 100' }
                     })}
                   />
                 </div>

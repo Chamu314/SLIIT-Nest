@@ -8,6 +8,7 @@ const errorHandler = require('./src/utils/errorHandler');
 const listingRoutes = require('./src/routes/listingRoutes');
 const authRoutes = require('./src/routes/authRoutes');
 const roommateRoutes = require('./src/routes/roommateRoutes');
+const connectionRoutes = require('./src/routes/connectionRoutes');
 
 // Connect Database
 connectDB();
@@ -33,6 +34,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/api/listings', listingRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/roommates', roommateRoutes);
+app.use('/api/connections', connectionRoutes);
 
 // Generic Root
 app.get('/', (req, res) => {

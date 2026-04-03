@@ -2,8 +2,11 @@ import React, { useState, useEffect, useContext } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import api from '../../api/axiosConfig';
 import { motion } from 'framer-motion';
-import { FiMapPin, FiDollarSign, FiUser, FiInfo, FiLock, FiMessageCircle, FiArrowLeft, FiEdit2, FiTrash2 } from 'react-icons/fi';
+import { FiMapPin, FiDollarSign, FiUser, FiInfo, FiLock, FiMessageCircle, FiArrowLeft, FiEdit2, FiTrash2, FiUserPlus, FiClock } from 'react-icons/fi';
 import { AuthContext } from '../../context/AuthContext';
+import { toast } from 'react-toastify';
+import PublicNavbar from '../../components/Layout/PublicNavbar';
+import PublicFooter from '../../components/Layout/PublicFooter';
 
 const RoommateProfile = () => {
   const { id } = useParams();
@@ -11,12 +14,35 @@ const RoommateProfile = () => {
   const navigate = useNavigate();
   const [post, setPost] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [connectionStatus, setConnectionStatus] = useState('none');
+  const [isSender, setIsSender] = useState(false);
+  const [connectionLoading, setConnectionLoading] = useState(false);
 
   useEffect(() => {
     const fetchPost = async () => {
       try {
         const { data } = await api.get(`/roommates/${id}`);
         setPost(data);
+
+        // If user logged in and it's not their own profile, fetch connection status
+        const isSelf = user && (user._id === data.user?._id || user.id === data.user?._id);
+        
+        if (user && !isSelf) {
+          setConnectionLoading(true);
+          try {
+            const statusRes = await api.get(`/connections/status/${data.user._id}/${data._id}`);
+            if (statusRes.data.success) {
+              setConnectionStatus(statusRes.data.status);
+              setIsSender(statusRes.data.isSender);
+            }
+          } catch (statusError) {
+            console.error('Error fetching connection status', statusError);
+          } finally {
+            setConnectionLoading(false);
+          }
+        } else if (isSelf) {
+          setConnectionStatus('self');
+        }
       } catch (error) {
         console.error('Error fetching post:', error);
       } finally {
@@ -24,23 +50,42 @@ const RoommateProfile = () => {
       }
     };
     fetchPost();
-  }, [id]);
+  }, [id, user]);
+
+  const handleSendRequest = async () => {
+    try {
+      await api.post('/connections/send', { receiverId: post.user?._id || post.user?.id, postId: id });
+      setConnectionStatus('pending');
+      setIsSender(true);
+      toast.success('Connection request sent!');
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to send request');
+    }
+  };
 
   const isVerified = user?.isVerified;
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#f3f4f6] flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#0b2b56]"></div>
+      <div className="min-h-screen bg-[#f3f4f6] flex flex-col">
+        <PublicNavbar activePage="roommates" />
+        <div className="flex-1 flex items-center justify-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#0b2b56]"></div>
+        </div>
+        <PublicFooter />
       </div>
     );
   }
 
   if (!post) {
     return (
-      <div className="min-h-screen bg-[#f3f4f6] flex items-center justify-center flex-col">
-        <h2 className="text-2xl font-bold text-[#1f2937] mb-2">Profile Not Found</h2>
-        <Link to="/roommates" className="text-[#0b2b56] hover:underline">Back to Search</Link>
+      <div className="min-h-screen bg-[#f3f4f6] flex flex-col">
+        <PublicNavbar activePage="roommates" />
+        <div className="flex-1 flex items-center justify-center flex-col">
+          <h2 className="text-2xl font-bold text-[#1f2937] mb-2">Profile Not Found</h2>
+          <Link to="/roommates" className="text-[#0b2b56] hover:underline">Back to Search</Link>
+        </div>
+        <PublicFooter />
       </div>
     );
   }
@@ -58,8 +103,9 @@ const RoommateProfile = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#f3f4f6] font-sans">
-      <div className="max-w-4xl mx-auto py-12 px-4">
+    <div className="min-h-screen bg-[#f3f4f6] font-sans flex flex-col">
+      <PublicNavbar activePage="roommates" />
+      <div className="max-w-4xl mx-auto py-12 px-4 flex-1 w-full">
         <Link to="/roommates" className="inline-flex items-center text-[#6b7280] hover:text-[#0b2b56] mb-6 transition font-medium">
           <FiArrowLeft className="mr-2" /> Back to Search
         </Link>
@@ -81,13 +127,13 @@ const RoommateProfile = () => {
                 </div>
               </div>
               <div className="flex-1 text-center md:text-left">
-                <h1 className="text-3xl font-extrabold text-[#1f2937] mb-1">{post.user?.firstName ? `${post.user.firstName} ${post.user.lastName}` : 'Anonymous User'}</h1>
+                <h1 className="text-3xl font-extrabold text-[#1f2937] mb-1">{post.user?.firstName ? `${post.user.firstName} ${post.user.lastName}` : 'Future Roommate 🌟'}</h1>
                 <div className="inline-flex items-center gap-1.5 text-sm font-medium text-teal-600 bg-teal-50 px-3 py-1 rounded-full">
                   {post.user?.isVerified ? '✓ SLIIT Verified' : 'Unverified Identity'}
                 </div>
               </div>
               <div className="shrink-0 flex gap-3">
-                {user?._id === post.user?._id ? (
+                {user && post.user && (user._id === post.user._id || user.id === post.user._id) ? (
                   <>
                     <button 
                       onClick={() => navigate(`/roommates/edit/${post._id}`)}
@@ -105,18 +151,38 @@ const RoommateProfile = () => {
                     </button>
                   </>
                 ) : (
-                  <a 
-                    href={post.whatsappNumber ? `https://wa.me/94${post.whatsappNumber.substring(1)}?text=Hi%20${encodeURIComponent(post.user?.firstName || 'there')},%20I%20saw%20your%20roommate%20profile%20on%20SLIIT%20Nest!` : '#'}
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className={`inline-flex items-center gap-2 px-6 py-3 rounded-lg font-bold shadow-md transition ${isVerified ? 'bg-[#16a34a] text-white hover:bg-[#15803d]' : 'bg-gray-300 text-gray-500 cursor-not-allowed'}`}
-                    onClick={(e) => {
-                      if (!isVerified || !post.whatsappNumber) e.preventDefault();
-                    }}
-                  >
-                    <FiMessageCircle size={20} />
-                    Message
-                  </a>
+                  <>
+                     {connectionLoading ? (
+                        <div className="h-12 w-32 bg-gray-200 rounded-lg animate-pulse" />
+                     ) : !isVerified ? (
+                       <button className="inline-flex items-center gap-2 px-6 py-3 rounded-lg font-bold shadow-md transition bg-gray-300 text-gray-500 cursor-not-allowed">
+                          <FiLock size={20} /> Verify to Connect
+                       </button>
+                     ) : connectionStatus === 'accepted' ? (
+                        <a 
+                          href={post.whatsappNumber ? `https://wa.me/94${post.whatsappNumber.substring(1)}?text=Hi%20${encodeURIComponent(post.user?.firstName || 'there')},%20I%20saw%20your%20roommate%20profile%20on%20SLIIT%20Nest!` : '#'}
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-2 px-6 py-3 rounded-lg font-bold shadow-md transition bg-[#16a34a] text-white hover:bg-[#15803d]"
+                        >
+                          <FiMessageCircle size={20} />
+                          Chat on WhatsApp
+                        </a>
+                     ) : connectionStatus === 'pending' ? (
+                        <button className="inline-flex items-center gap-2 px-6 py-3 rounded-lg font-bold shadow-md transition bg-yellow-100 text-yellow-700 cursor-not-allowed border border-yellow-200">
+                          <FiClock size={20} />
+                          {isSender ? 'Request Sent' : 'Request Received'}
+                        </button>
+                     ) : (
+                        <button 
+                          onClick={handleSendRequest}
+                          className="inline-flex items-center gap-2 px-6 py-3 rounded-lg font-bold shadow-md transition bg-[#0b2b56] text-white hover:bg-[#081f40]"
+                        >
+                          <FiUserPlus size={20} />
+                          Send Connect Request
+                        </button>
+                     )}
+                  </>
                 )}
               </div>
             </div>
@@ -146,6 +212,10 @@ const RoommateProfile = () => {
                     <div className="bg-[#f3f4f6] p-4 rounded-xl">
                       <p className="text-xs text-gray-500 font-semibold mb-1 uppercase">Smoking</p>
                       <p className="text-[#1f2937] font-medium">{post.habits?.nonSmoker ? 'Non-smoker strictly' : 'No preference'}</p>
+                    </div>
+                    <div className="bg-[#f3f4f6] p-4 rounded-xl">
+                      <p className="text-xs text-gray-500 font-semibold mb-1 uppercase">Age Group</p>
+                      <p className="text-[#1f2937] font-medium">{post.ageCategory || 'N/A'}</p>
                     </div>
                   </div>
                 </section>
@@ -214,6 +284,7 @@ const RoommateProfile = () => {
           </div>
         </div>
       </div>
+      <PublicFooter />
     </div>
   );
 };
