@@ -11,6 +11,7 @@ const VerifyEmail = () => {
   const navigate = useNavigate();
   
   const email = location.state?.email;
+  const redirectTo = location.state?.redirectTo;
 
   useEffect(() => {
     if (!email) {
@@ -42,7 +43,7 @@ const VerifyEmail = () => {
     try {
       await api.post('/auth/verifyemail', { email, code: verificationCode });
       toast.success('Email verified! You can now log in.');
-      navigate('/login');
+      navigate('/login', { state: redirectTo ? { redirectTo } : undefined });
     } catch (err) {
       toast.error(err.response?.data?.message || 'Verification failed');
       setCode(['', '', '', '', '', '']);

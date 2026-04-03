@@ -3,9 +3,36 @@ const bcrypt = require('bcryptjs');
 
 const userSchema = new mongoose.Schema(
   {
-    fullName: {
+    firstName: {
       type: String,
-      required: [true, 'Please add a full name'],
+      required: [true, 'Please add a first name'],
+      maxlength: [20, 'First name can not be more than 20 characters'],
+    },
+    lastName: {
+      type: String,
+      required: [true, 'Please add a last name'],
+      maxlength: [20, 'Last name can not be more than 20 characters'],
+    },
+    phoneNumber: {
+      type: String,
+      required: [true, 'Please add a phone number'],
+      match: [/^[0-9]{10}$/, 'Phone number must be exactly 10 digits'],
+    },
+    address: {
+      type: String,
+      required: [true, 'Please add an address'],
+      maxlength: [50, 'Address can not be more than 50 characters'],
+    },
+    gender: {
+      type: String,
+      required: [true, 'Please specify gender'],
+      enum: ['Male', 'Female'],
+    },
+    age: {
+      type: Number,
+      required: [true, 'Please specify age'],
+      min: [10, 'Age must be at least 10'],
+      max: [100, 'Age must be at most 100'],
     },
     email: {
       type: String,

@@ -39,7 +39,7 @@ const Header = () => {
             </div>
             <div className="text-left hidden sm:block">
               <p className="text-sm font-medium text-gray-800 leading-tight">
-                {user?.fullName || 'Guest'}
+                {user?.firstName ? `${user.firstName} ${user.lastName}` : 'Guest'}
               </p>
               <p className="text-xs text-gray-500 leading-tight">
                 {user?.role}

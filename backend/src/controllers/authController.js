@@ -28,7 +28,12 @@ const sendTokenResponse = (user, statusCode, res) => {
       token,
       data: {
         _id: user._id,
-        fullName: user.fullName,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        phoneNumber: user.phoneNumber,
+        address: user.address,
+        gender: user.gender,
+        age: user.age,
         email: user.email,
         role: user.role,
         isVerified: user.isVerified
@@ -41,7 +46,7 @@ const sendTokenResponse = (user, statusCode, res) => {
 // @access  Public
 exports.registerUser = async (req, res, next) => {
   try {
-    const { fullName, email, password, role } = req.body;
+    const { firstName, lastName, phoneNumber, address, gender, age, email, password, role } = req.body;
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
@@ -53,7 +58,12 @@ exports.registerUser = async (req, res, next) => {
     const verificationCodeExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 mins
 
     const user = await User.create({
-      fullName,
+      firstName,
+      lastName,
+      phoneNumber,
+      address,
+      gender,
+      age,
       email,
       password,
       role,
@@ -233,8 +243,12 @@ exports.getMe = async (req, res, next) => {
 exports.updateProfile = async (req, res, next) => {
   try {
     const fieldsToUpdate = {
-      fullName: req.body.fullName,
-      // allow updating phone if we add it to model later.
+      firstName: req.body.firstName,
+      lastName: req.body.lastName,
+      phoneNumber: req.body.phoneNumber,
+      address: req.body.address,
+      gender: req.body.gender,
+      age: req.body.age,
     };
 
     const user = await User.findByIdAndUpdate(req.user.id, fieldsToUpdate, {

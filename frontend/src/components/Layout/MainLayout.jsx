@@ -26,7 +26,7 @@ const MainLayout = () => {
       
       doc.setFontSize(12);
       doc.setTextColor(100);
-      doc.text(`Owner Name: ${user.fullName}`, 14, 32);
+      doc.text(`Owner Name: ${user.firstName} ${user.lastName}`, 14, 32);
       doc.text(`Email: ${user.email}`, 14, 38);
       doc.text(`Total Active Listings: ${listings.length}`, 14, 44);
       doc.text(`Report Generated On: ${new Date().toLocaleDateString()}`, 14, 50);
@@ -55,7 +55,7 @@ const MainLayout = () => {
         });
       }
 
-      doc.save(`SLIIT_Nest_Owner_Report_${user.fullName.replace(/\s+/g, '_')}.pdf`);
+      doc.save(`SLIIT_Nest_Owner_Report_${user.firstName}_${user.lastName}.pdf`);
       toast.success("Report Generated Successfully");
     } catch (error) {
        console.error("Error generating report:", error);
