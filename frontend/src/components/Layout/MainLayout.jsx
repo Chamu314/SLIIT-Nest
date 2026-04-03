@@ -4,7 +4,7 @@ import { FiHome, FiList, FiSearch, FiShield, FiDownload, FiGlobe } from 'react-i
 import { AuthContext } from '../../context/AuthContext';
 import Header from './Header';
 import { jsPDF } from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 import api from '../../api/axiosConfig';
 import { toast } from 'react-toastify';
 
@@ -46,7 +46,7 @@ const MainLayout = () => {
           tableRows.push(listingData);
         });
 
-        doc.autoTable({
+        autoTable(doc, {
           startY: 60,
           head: [tableColumn],
           body: tableRows,
@@ -66,67 +66,33 @@ const MainLayout = () => {
   };
 
   const renderNavLinks = () => {
+    const linkStyle = ({ isActive }) =>
+      `flex items-center gap-3 px-4 py-2 rounded-lg transition-colors ${
+        isActive ? 'bg-blue-100 text-blue-700 font-medium' : 'text-gray-600 hover:bg-blue-100/50'
+      }`;
+
     switch (user?.role) {
       case 'Owner':
         return (
           <>
-            <NavLink
-              to="/"
-              className={({ isActive }) =>
-                `flex items-center gap-3 px-4 py-2 rounded-lg transition-colors text-gray-600 hover:bg-gray-50`
-              }
-            >
+            <NavLink to="/" className="flex items-center gap-3 px-4 py-2 rounded-lg transition-colors text-gray-600 hover:bg-blue-100/50">
               <FiGlobe /> Home
             </NavLink>
-            <NavLink
-              to="/dashboard"
-              className={({ isActive }) =>
-                `flex items-center gap-3 px-4 py-2 rounded-lg transition-colors ${
-                  isActive ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-600 hover:bg-gray-50'
-                }`
-              }
-            >
+            <NavLink to="/dashboard" className={linkStyle}>
               <FiHome /> Dashboard
             </NavLink>
-            <NavLink
-              to="/listings"
-              className={({ isActive }) =>
-                `flex items-center gap-3 px-4 py-2 rounded-lg transition-colors ${
-                  isActive ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-600 hover:bg-gray-50'
-                }`
-              }
-            >
+            <NavLink to="/listings" className={linkStyle}>
               <FiList /> My Listings
             </NavLink>
-            
-            <div className="pt-4 mt-4 border-t border-gray-100">
-              <button
-                onClick={generatePDF}
-                disabled={isGenerating}
-                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-50 border border-blue-200 rounded-lg text-blue-600 font-medium hover:bg-blue-100 hover:text-blue-700 transition"
-              >
-                <FiDownload /> {isGenerating ? 'Generating...' : 'Generate Report'}
-              </button>
-            </div>
           </>
         );
       case 'Admin':
         return (
           <>
-            <NavLink
-              to="/"
-              className="flex items-center gap-3 px-4 py-2 rounded-lg transition-colors text-gray-600 hover:bg-gray-50"
-            >
+            <NavLink to="/" className="flex items-center gap-3 px-4 py-2 rounded-lg transition-colors text-gray-600 hover:bg-blue-100/50">
               <FiGlobe /> Home
             </NavLink>
-            <NavLink
-              to="/admin"
-              className={({ isActive }) =>
-                `flex items-center gap-3 px-4 py-2 rounded-lg transition-colors ${
-                  isActive ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-600 hover:bg-gray-50'
-                }`
-              }
-            >
+            <NavLink to="/admin" className={linkStyle}>
               <FiShield /> Admin Dashboard
             </NavLink>
           </>
@@ -135,20 +101,10 @@ const MainLayout = () => {
       default:
         return (
           <>
-            <NavLink
-              to="/"
-              className="flex items-center gap-3 px-4 py-2 rounded-lg transition-colors text-gray-600 hover:bg-gray-50"
-            >
+            <NavLink to="/" className="flex items-center gap-3 px-4 py-2 rounded-lg transition-colors text-gray-600 hover:bg-blue-100/50">
               <FiGlobe /> Home
             </NavLink>
-            <NavLink
-              to="/search"
-              className={({ isActive }) =>
-                `flex items-center gap-3 px-4 py-2 rounded-lg transition-colors ${
-                  isActive ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-600 hover:bg-gray-50'
-                }`
-              }
-            >
+            <NavLink to="/search" className={linkStyle}>
               <FiSearch /> Search Boardings
             </NavLink>
           </>
@@ -159,8 +115,8 @@ const MainLayout = () => {
   return (
     <div className="flex bg-gray-50 h-screen font-sans">
       {/* Sidebar */}
-      <aside className="w-64 bg-white border-r border-gray-200 flex flex-col fixed inset-y-0 z-20">
-        <div className="p-6 border-b border-gray-100 flex items-center gap-3">
+      <aside className="w-64 bg-blue-50 border-r border-blue-100 flex flex-col fixed inset-y-0 z-20">
+        <div className="p-6 border-b border-blue-100 flex items-center gap-3">
           <img src="/logo.png" alt="SLIIT Nest" className="w-8 h-8 object-contain" fallback="M" onError={(e) => e.target.style.display='none'} />
           <h1 className="font-bold text-xl text-blue-600">SLIIT<span className="text-gray-800">Nest</span></h1>
         </div>
@@ -168,6 +124,19 @@ const MainLayout = () => {
         <nav className="flex-1 overflow-y-auto py-6 px-4 space-y-2">
           {renderNavLinks()}
         </nav>
+
+        {/* Generate Report Button at the bottom */}
+        {user?.role === 'Owner' && (
+          <div className="p-4 border-t border-blue-100 mt-auto">
+            <button
+              onClick={generatePDF}
+              disabled={isGenerating}
+              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-white border border-blue-200 rounded-lg text-blue-600 font-medium hover:bg-blue-100 hover:text-blue-700 transition shadow-sm"
+            >
+              <FiDownload /> {isGenerating ? 'Generating...' : 'Generate Report'}
+            </button>
+          </div>
+        )}
       </aside>
 
       {/* Main Content Area */}
