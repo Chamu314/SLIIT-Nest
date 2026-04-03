@@ -8,6 +8,9 @@ router.route('/')
   .get(protectOptional, roommateController.getPosts)
   .post(protect, roommateController.createPost);
 
+// Protected: Get my own posts (must be before /:id to avoid conflict)
+router.get('/mine', protect, roommateController.getMyPosts);
+
 router.route('/:id')
   .get(protectOptional, roommateController.getPostById)
   .patch(protect, roommateController.updatePost)

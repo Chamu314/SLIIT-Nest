@@ -1,6 +1,8 @@
 import React, { useContext } from 'react';
+import { Link } from 'react-router-dom';
 import { AuthContext } from '../../context/AuthContext';
-import { FiUser, FiMail, FiShield, FiCheckCircle } from 'react-icons/fi';
+import { FiUser, FiMail, FiShield, FiCheckCircle, FiArrowLeft } from 'react-icons/fi';
+import MyRoommatePosts from './MyRoommatePosts';
 
 const Profile = () => {
   const { user } = useContext(AuthContext);
@@ -9,7 +11,15 @@ const Profile = () => {
 
   return (
     <div className="max-w-3xl mx-auto space-y-6">
-      <h1 className="text-2xl font-bold text-gray-900">My Profile</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold text-gray-900">My Profile</h1>
+        <Link
+          to="/roommates"
+          className="inline-flex items-center gap-2 text-sm font-semibold text-[#0b2b56] hover:text-indigo-700 bg-blue-50 hover:bg-blue-100 px-4 py-2 rounded-lg border border-blue-100 transition"
+        >
+          <FiArrowLeft size={15} /> Back to Roommates
+        </Link>
+      </div>
       
       <div className="bg-white shadow rounded-2xl overflow-hidden border border-gray-100">
         <div className="h-32 bg-gradient-to-r from-blue-500 to-purple-600"></div>
@@ -82,6 +92,8 @@ const Profile = () => {
           </div>
         </div>
       </div>
+      {/* My Roommate Posts - Students only */}
+      {user.role === 'Student' && <MyRoommatePosts />}
 
     </div>
   );

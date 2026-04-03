@@ -117,6 +117,19 @@ exports.updatePost = async (req, res) => {
   }
 };
 
+// @desc    Get all posts by the logged-in user
+// @route   GET /api/roommates/mine
+// @access  Protected
+exports.getMyPosts = async (req, res) => {
+  try {
+    const posts = await RoommatePost.find({ user: req.user._id })
+      .sort('-createdAt');
+    res.status(200).json(posts);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 // @desc    Delete a roommate post
 // @route   DELETE /api/roommates/:id
 // @access  Protected

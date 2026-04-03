@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import api from '../../api/axiosConfig';
 import { FiUser, FiMail, FiLock, FiShield, FiEye, FiEyeOff, FiPhone, FiMapPin, FiCalendar } from 'react-icons/fi';
@@ -8,6 +8,8 @@ import { FiUser, FiMail, FiLock, FiShield, FiEye, FiEyeOff, FiPhone, FiMapPin, F
 const Register = () => {
   const { register, handleSubmit, watch, formState: { errors } } = useForm();
   const navigate = useNavigate();
+  const location = useLocation();
+  const redirectTo = location.state?.redirectTo || '/roommates';
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -31,7 +33,7 @@ const Register = () => {
 
       await api.post('/auth/register', payload);
       toast.success('Registration successful! Please verify your email.');
-      navigate('/verify-email', { state: { email: data.email } });
+      navigate('/verify-email', { state: { email: data.email, redirectTo } });
     } catch (err) {
       toast.error(err.response?.data?.message || err.message || 'Registration failed');
       console.error("Registration Error", err);
@@ -287,7 +289,11 @@ const Register = () => {
 
           <div className="mt-6 text-center text-sm">
             <span className="text-gray-500">Already have an account? </span>
-            <Link to="/login" className="font-medium text-blue-600 hover:text-blue-500 transition-colors">
+            <Link
+              to="/login"
+              state={{ redirectTo }}
+              className="font-medium text-blue-600 hover:text-blue-500 transition-colors"
+            >
               Log in
             </Link>
           </div>

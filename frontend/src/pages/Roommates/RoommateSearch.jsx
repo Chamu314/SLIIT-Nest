@@ -221,10 +221,12 @@ const RoommateSearch = () => {
                     <div className="absolute top-0 right-0 w-32 h-32 bg-teal-400/10 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none group-hover:bg-teal-400/20 transition-all"></div>
                     <div className="flex justify-between items-start mb-4">
                       <div>
-                        <h3 className="text-xl font-bold text-[#1f2937] mb-1">{post.user?.firstName ? `${post.user.firstName} ${post.user.lastName}` : 'Future Roommate 🌟'}</h3>
+                        <h3 className="text-xl font-bold mb-1 bg-gradient-to-r from-[#0b2b56] via-indigo-500 to-teal-400 bg-clip-text text-transparent bg-[length:200%_auto] animate-[shimmer_3s_linear_infinite]">
+                          {post.user?.firstName ? `${post.user.firstName} ${post.user.lastName}` : 'Future Roommate 🌟'}
+                        </h3>
                         <div className="flex items-center gap-2 mb-2">
-                          <span className="flex items-center gap-1 text-sm bg-blue-50 text-blue-700 px-2 py-1 rounded">
-                            <FiMapPin size={14} /> {post.location}
+                          <span className="flex items-center gap-1 text-sm bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-800 px-3 py-1 rounded-full border border-blue-200/60 font-medium shadow-sm">
+                            <FiMapPin size={13} className="text-teal-500" /> {post.location}
                           </span>
                         </div>
                       </div>

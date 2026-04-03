@@ -17,6 +17,7 @@ const RoommateProfile = () => {
   const [connectionStatus, setConnectionStatus] = useState('none');
   const [isSender, setIsSender] = useState(false);
   const [connectionLoading, setConnectionLoading] = useState(false);
+  const [isSending, setIsSending] = useState(false);
 
   useEffect(() => {
     const fetchPost = async () => {
@@ -53,6 +54,8 @@ const RoommateProfile = () => {
   }, [id, user]);
 
   const handleSendRequest = async () => {
+    if (isSending) return;
+    setIsSending(true);
     try {
       await api.post('/connections/send', { receiverId: post.user?._id || post.user?.id, postId: id });
       setConnectionStatus('pending');
@@ -60,6 +63,8 @@ const RoommateProfile = () => {
       toast.success('Connection request sent!');
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to send request');
+    } finally {
+      setIsSending(false);
     }
   };
 
@@ -67,25 +72,33 @@ const RoommateProfile = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#f3f4f6] flex flex-col">
-        <PublicNavbar activePage="roommates" />
-        <div className="flex-1 flex items-center justify-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#0b2b56]"></div>
+      <div className="min-h-screen font-sans flex flex-col relative overflow-hidden">
+        <div className="fixed inset-0 z-0 bg-cover bg-center" style={{ backgroundImage: 'url(/green.jpg)', filter: 'blur(5px)', transform: 'scale(1.1)' }} />
+        <div className="fixed inset-0 z-0 bg-[#f3f4f6]/65" />
+        <div className="relative z-10 flex flex-col min-h-screen w-full">
+          <PublicNavbar activePage="roommates" />
+          <div className="flex-1 flex items-center justify-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#0b2b56]"></div>
+          </div>
+          <PublicFooter />
         </div>
-        <PublicFooter />
       </div>
     );
   }
 
   if (!post) {
     return (
-      <div className="min-h-screen bg-[#f3f4f6] flex flex-col">
-        <PublicNavbar activePage="roommates" />
-        <div className="flex-1 flex items-center justify-center flex-col">
-          <h2 className="text-2xl font-bold text-[#1f2937] mb-2">Profile Not Found</h2>
-          <Link to="/roommates" className="text-[#0b2b56] hover:underline">Back to Search</Link>
+      <div className="min-h-screen font-sans flex flex-col relative overflow-hidden">
+        <div className="fixed inset-0 z-0 bg-cover bg-center" style={{ backgroundImage: 'url(/green.jpg)', filter: 'blur(5px)', transform: 'scale(1.1)' }} />
+        <div className="fixed inset-0 z-0 bg-[#f3f4f6]/65" />
+        <div className="relative z-10 flex flex-col min-h-screen w-full">
+          <PublicNavbar activePage="roommates" />
+          <div className="flex-1 flex items-center justify-center flex-col">
+            <h2 className="text-2xl font-bold text-[#1f2937] mb-2">Profile Not Found</h2>
+            <Link to="/roommates" className="text-[#0b2b56] hover:underline">Back to Search</Link>
+          </div>
+          <PublicFooter />
         </div>
-        <PublicFooter />
       </div>
     );
   }
@@ -103,12 +116,26 @@ const RoommateProfile = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#f3f4f6] font-sans flex flex-col">
-      <PublicNavbar activePage="roommates" />
-      <div className="max-w-4xl mx-auto py-12 px-4 flex-1 w-full">
-        <Link to="/roommates" className="inline-flex items-center text-[#6b7280] hover:text-[#0b2b56] mb-6 transition font-medium">
-          <FiArrowLeft className="mr-2" /> Back to Search
-        </Link>
+    <div className="min-h-screen font-sans flex flex-col relative overflow-hidden">
+      {/* Blurred Background */}
+      <div 
+        className="fixed inset-0 z-0 bg-cover bg-center"
+        style={{ 
+          backgroundImage: 'url(/green.jpg)', 
+          filter: 'blur(5px)',
+          transform: 'scale(1.1)' 
+        }} 
+      />
+      {/* Content overlay to retain readability */}
+      <div className="fixed inset-0 z-0 bg-[#f3f4f6]/65" />
+
+      {/* Main Content Layer */}
+      <div className="relative z-10 flex flex-col min-h-screen w-full">
+        <PublicNavbar activePage="roommates" />
+        <div className="max-w-4xl mx-auto py-12 px-4 flex-1 w-full">
+          <Link to="/roommates" className="inline-flex items-center text-[#6b7280] hover:text-[#0b2b56] mb-6 transition font-medium">
+            <FiArrowLeft className="mr-2" /> Back to Search
+          </Link>
         
         <div className="bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden relative">
           
@@ -176,10 +203,20 @@ const RoommateProfile = () => {
                      ) : (
                         <button 
                           onClick={handleSendRequest}
-                          className="inline-flex items-center gap-2 px-6 py-3 rounded-lg font-bold shadow-md transition bg-[#0b2b56] text-white hover:bg-[#081f40]"
+                          disabled={isSending}
+                          className={`inline-flex items-center gap-2 px-6 py-3 rounded-lg font-bold shadow-md transition ${isSending ? 'bg-gray-400 text-white cursor-not-allowed' : 'bg-[#0b2b56] text-white hover:bg-[#081f40]'}`}
                         >
-                          <FiUserPlus size={20} />
-                          Send Connect Request
+                          {isSending ? (
+                            <>
+                              <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-white"></div>
+                              Sending...
+                            </>
+                          ) : (
+                            <>
+                              <FiUserPlus size={20} />
+                              Send Connect Request
+                            </>
+                          )}
                         </button>
                      )}
                   </>
@@ -284,7 +321,10 @@ const RoommateProfile = () => {
           </div>
         </div>
       </div>
-      <PublicFooter />
+      <div className="w-full mt-auto">
+        <PublicFooter />
+      </div>
+     </div>
     </div>
   );
 };

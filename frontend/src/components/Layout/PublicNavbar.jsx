@@ -1,5 +1,5 @@
 import React, { useContext, useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { FiUser, FiChevronDown, FiLogOut, FiUsers, FiBell } from 'react-icons/fi';
 import { AuthContext } from '../../context/AuthContext';
 import api from '../../api/axiosConfig';
@@ -7,6 +7,9 @@ import api from '../../api/axiosConfig';
 const PublicNavbar = ({ activePage }) => {
   const { user, isAuthenticated, logout } = useContext(AuthContext);
   const navigate = useNavigate();
+  const location = useLocation();
+  // Pass redirectTo so students bounce back after login/register from roommates pages
+  const authRedirectState = location.pathname.startsWith('/roommates') ? { redirectTo: '/roommates' } : undefined;
   const [showDropdown, setShowDropdown] = useState(false);
   const [pendingCount, setPendingCount] = useState(0);
 
@@ -142,12 +145,14 @@ const PublicNavbar = ({ activePage }) => {
           <>
             <Link
               to="/login"
+              state={authRedirectState}
               className="px-5 py-2 text-sm font-medium border border-[#0b2b56] text-[#0b2b56] rounded-lg hover:bg-gray-50 transition"
             >
               Login
             </Link>
             <Link
               to="/register"
+              state={authRedirectState}
               className="px-5 py-2 text-sm font-medium bg-[#0b2b56] text-white rounded-lg hover:bg-[#081f40] transition shadow-md"
             >
               Sign Up

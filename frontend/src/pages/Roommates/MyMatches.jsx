@@ -47,21 +47,36 @@ const MyMatches = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#f3f4f6] flex flex-col font-sans">
-        <PublicNavbar activePage="roommates" />
-        <div className="flex-1 flex items-center justify-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#0b2b56]"></div>
+      <div className="min-h-screen font-sans flex flex-col relative overflow-hidden">
+        <div className="fixed inset-0 z-0 bg-cover bg-center" style={{ backgroundImage: 'url(/green.jpg)', filter: 'blur(5px)', transform: 'scale(1.1)' }} />
+        <div className="fixed inset-0 z-0 bg-[#f3f4f6]/65" />
+        <div className="relative z-10 flex flex-col min-h-screen w-full">
+          <PublicNavbar activePage="roommates" />
+          <div className="flex-1 flex items-center justify-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#0b2b56]"></div>
+          </div>
+          <PublicFooter />
         </div>
-        <PublicFooter />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#f3f4f6] font-sans flex flex-col">
-      <PublicNavbar activePage="roommates" />
-      
-      <div className="flex-1 max-w-5xl mx-auto w-full px-4 py-12">
+    <div className="min-h-screen font-sans flex flex-col relative overflow-hidden">
+      <div 
+        className="fixed inset-0 z-0 bg-cover bg-center"
+        style={{ 
+          backgroundImage: 'url(/green.jpg)', 
+          filter: 'blur(5px)',
+          transform: 'scale(1.1)' 
+        }} 
+      />
+      <div className="fixed inset-0 z-0 bg-[#f3f4f6]/65" />
+
+      <div className="relative z-10 flex flex-col min-h-screen w-full">
+        <PublicNavbar activePage="roommates" />
+        
+        <div className="flex-1 max-w-5xl mx-auto w-full px-4 py-12">
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
           <h1 className="text-3xl font-extrabold text-[#0b2b56] mb-2">My Matches & Requests</h1>
           <p className="text-gray-500 mb-8">Manage your roommate connection requests and active matches.</p>
@@ -180,7 +195,10 @@ const MyMatches = () => {
         </section>
       </div>
 
-      <PublicFooter />
+      <div className="w-full mt-auto">
+        <PublicFooter />
+      </div>
+     </div>
     </div>
   );
 };

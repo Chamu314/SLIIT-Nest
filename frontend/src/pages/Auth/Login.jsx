@@ -27,7 +27,8 @@ const Login = () => {
          const role = resData.data.role;
          if (role === 'Owner') navigate('/dashboard', { replace: true });
          else if (role === 'Admin') navigate('/admin', { replace: true });
-         else if (role === 'Student') navigate('/search', { replace: true });
+         // Students coming via /roommates flow land back there; default to /roommates
+         else if (role === 'Student') navigate(location.state?.redirectTo || '/roommates', { replace: true });
          else navigate('/', { replace: true });
       }
 
@@ -139,6 +140,7 @@ const Login = () => {
             <div className="mt-6">
               <Link
                 to="/register"
+                state={location.state?.redirectTo ? { redirectTo: location.state.redirectTo } : undefined}
                 className="w-full flex justify-center py-3 px-4 border border-gray-300 rounded-xl shadow-sm text-sm font-medium text-gray-700 bg-white/80 hover:bg-gray-50 focus:outline-none transition-colors"
               >
                 Create an account

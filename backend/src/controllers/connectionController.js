@@ -19,17 +19,35 @@ exports.sendConnectionRequest = async (req, res, next) => {
       return res.status(404).json({ success: false, message: 'Receiver not found' });
     }
 
-    // Check if connection already exists in any direction
-    const existingConnection = await Connection.findOne({
-      $or: [
-        { sender: senderId, receiver: receiverId, post: postId },
-        { sender: receiverId, receiver: senderId, post: postId }
-      ],
+    // 1. Check if exact connection already exists
+    let forwardConnection = await Connection.findOne({
+      sender: senderId,
+      receiver: receiverId,
+      post: postId
+    });
+
+    if (forwardConnection) {
+      if (['pending', 'accepted'].includes(forwardConnection.status)) {
+        return res.status(400).json({ success: false, message: 'Connection request already exists or is accepted' });
+      } else {
+        // Was rejected, just 'renew' it to allow resending
+        forwardConnection.status = 'pending';
+        if (message) forwardConnection.message = message;
+        await forwardConnection.save();
+        return res.status(200).json({ success: true, data: forwardConnection });
+      }
+    }
+
+    // 2. Also verify no pending/accepted connection exists in the REVERSE direction
+    let reverseConnection = await Connection.findOne({
+      sender: receiverId,
+      receiver: senderId,
+      post: postId,
       status: { $in: ['pending', 'accepted'] }
     });
 
-    if (existingConnection) {
-      return res.status(400).json({ success: false, message: 'Connection request already exists or is accepted' });
+    if (reverseConnection) {
+      return res.status(400).json({ success: false, message: 'A connection request from this user already exists' });
     }
 
     const connection = await Connection.create({
@@ -45,7 +63,7 @@ exports.sendConnectionRequest = async (req, res, next) => {
     });
   } catch (error) {
     if (error.code === 11000) {
-      return res.status(400).json({ success: false, message: 'Connection already exists' });
+      return res.status(400).json({ success: false, message: 'Connection request is already being processed' });
     }
     next(error);
   }

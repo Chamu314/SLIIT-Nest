@@ -81,9 +81,20 @@ const CreateRoommatePost = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#f3f4f6] font-sans flex flex-col">
-      <PublicNavbar activePage="roommates" />
-      <div className="flex-1 py-12 px-4">
+    <div className="min-h-screen font-sans flex flex-col relative overflow-hidden">
+      <div 
+        className="fixed inset-0 z-0 bg-cover bg-center"
+        style={{ 
+          backgroundImage: 'url(/green.jpg)', 
+          filter: 'blur(5px)',
+          transform: 'scale(1.1)' 
+        }} 
+      />
+      <div className="fixed inset-0 z-0 bg-[#f3f4f6]/65" />
+
+      <div className="relative z-10 flex flex-col min-h-screen w-full">
+        <PublicNavbar activePage="roommates" />
+        <div className="flex-1 py-12 px-4">
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -238,8 +249,11 @@ const CreateRoommatePost = () => {
           </div>
         </form>
       </motion.div>
+        </div>
+        <div className="w-full mt-auto">
+          <PublicFooter />
+        </div>
       </div>
-      <PublicFooter />
     </div>
   );
 };
