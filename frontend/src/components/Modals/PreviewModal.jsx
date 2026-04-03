@@ -18,7 +18,7 @@ const PreviewModal = ({ isOpen, onClose, data }) => {
 
   const getImageUrl = (url) => {
     if (!url) return '';
-    if (url.startsWith('/uploads')) return `http://localhost:5001${url}`;
+    if (url.startsWith('/uploads')) return `http://localhost:5000${url}`;
     if (url.startsWith('blob:')) return url;
     return url;
   };
